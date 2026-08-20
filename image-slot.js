@@ -296,8 +296,13 @@
     // .frame img (clipped) and .spill (unclipped ghost + handles) share the
     // same left/top/width/height in frame-%, computed by _applyView(), so the
     // inside-mask crop and the outside-mask spill stay pixel-aligned.
+    // touch-action stays at its default (not none) here: this <img> has no
+    // pointer/touch listeners of its own — pan/resize live entirely on
+    // .spill, gated behind data-reframe — so locking it down only cost the
+    // published site its native touch-scroll whenever a swipe started on
+    // top of a filled slot (hero, "Quem Somos", loja photos).
     '.frame img{position:absolute;max-width:none;transform:translate(-50%,-50%);' +
-    '  -webkit-user-drag:none;user-select:none;touch-action:none}' +
+    '  -webkit-user-drag:none;user-select:none}' +
     // Reframe mode (double-click): the full image spills past the mask. The
     // spill layer is sized to the IMAGE bounds so its corners are where the
     // resize handles belong. The ghost <img> inside is translucent; the real
@@ -1107,6 +1112,10 @@
         };
       }
       this._cap.textContent = this.getAttribute('placeholder') || 'Drop an image';
+      // alt text: reuse the authored placeholder caption as the filled
+      // image's accessible/SEO description — it was already written to
+      // describe the photo, and this was the only path never wiring it in.
+      this._img.alt = this.getAttribute('placeholder') || '';
       // Toggle via style.display — the [hidden] attribute alone loses to
       // the display:flex / display:block rules in the stylesheet above.
       // An Unsplash src with no credit attribute must NOT render — showing

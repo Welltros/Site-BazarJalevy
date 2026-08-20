@@ -5,14 +5,13 @@ formato "Design Canvas" (`.dc.html`), que roda direto no navegador sem build.
 
 ## Arquivo principal
 
-**`Bazar Jalevy.dc.html`** — todo o conteúdo, layout e estilos do site estão aqui.
-`index.html` só existe para abrir esse arquivo automaticamente quando o projeto é
-servido por um servidor local (o nome do arquivo principal tem espaço, o que
-alguns servidores não tratam bem como página inicial).
+**`bazar-jalevy.dc.html`** — todo o conteúdo, layout e estilos do site estão aqui.
+`index.html` existe para redirecionar para esse arquivo quando o projeto é aberto
+pela raiz (`/`), já que servidores estáticos servem `index.html` por padrão.
 
 ## Como rodar localmente
 
-Abra `index.html` (ou `Bazar Jalevy.dc.html` diretamente) num servidor local, por exemplo:
+Abra `index.html` (ou `bazar-jalevy.dc.html` diretamente) num servidor local, por exemplo:
 
 ```
 npx serve .
@@ -27,13 +26,13 @@ python -m http.server 8000
 Depois acesse `http://localhost:PORTA/`. É necessário internet na primeira carga,
 pois a página busca React, ReactDOM e as fontes do Google Fonts via CDN.
 
-Também é possível abrir `Bazar Jalevy.dc.html` direto no navegador com duplo clique,
+Também é possível abrir `bazar-jalevy.dc.html` direto no navegador com duplo clique,
 sem servidor.
 
 ## Estrutura de arquivos
 
 ```
-Bazar Jalevy.dc.html   → conteúdo/layout do site (editar aqui)
+bazar-jalevy.dc.html   → conteúdo/layout do site (editar aqui)
 index.html             → redireciona para o arquivo acima
 support.js             → runtime do Design Canvas (gerado — não editar à mão)
 image-slot.js          → componente de imagem com troca/upload (gerado — não editar à mão)
@@ -41,6 +40,8 @@ image-slot.js          → componente de imagem com troca/upload (gerado — nã
 .thumbnail              → miniatura de preview do projeto
 photos/                → fotos usadas no site, já referenciadas no HTML
 videos/                → vídeos usados no site (comprimidos para a web)
+robots.txt              → regras de rastreamento para buscadores
+sitemap.xml             → mapa de URLs do site para buscadores
 ```
 
 ## Observações
@@ -49,3 +50,11 @@ videos/                → vídeos usados no site (comprimidos para a web)
   (não editar diretamente — o próprio cabeçalho de cada arquivo indica isso).
 - A pasta `uploads/` com as fotos originais da câmera (sem uso no site) foi removida
   por já estarem todas presentes, renomeadas e em uso em `photos/`.
+
+## Antes de publicar
+
+`bazar-jalevy.dc.html`, `index.html`, `robots.txt` e `sitemap.xml` usam
+`www.bazarjalevy.example` como domínio provisório (canonical, Open Graph, Twitter
+Card, dados estruturados e sitemap). Assim que o domínio real for definido, troque
+todas as ocorrências de `bazarjalevy.example` pelo domínio final antes de publicar —
+buscar por `bazarjalevy.example` nesses 4 arquivos encontra todos os pontos.
