@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bazar e Papelaria Jalevy</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800&family=Lora:ital,wght@0,500;0,600;1,500&display=swap" rel="stylesheet">
+  <script src="./image-slot.js"></script>
+  <style>
+    body { margin: 0; background: #F7F4EC; font-family: 'Archivo', sans-serif; color: #1E2B2A; }
+    a { color: #8a6a12; text-decoration: none; }
+    a:hover { color: #1F6F5C; }
+    * { box-sizing: border-box; }
+    ::selection { background: #E0A526; color: #1E2B2A; }
+
+    /* Motion: entrance */
+    @keyframes ds-rise-in { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes ds-fade-in { from { opacity: 0; } to { opacity: 1; } }
+
+    /* Overdrive: hero "instrument panel" calibration — corner brackets draw in, then a single scan sweep. Runs once on load. */
+    .ds-instrument { position: relative; border-radius: 20px; overflow: hidden; }
+    .ds-bracket { position: absolute; width: 28px; height: 28px; pointer-events: none; z-index: 2; }
+    .ds-bracket i { position: absolute; background: #E0A526; border-radius: 1px; }
+    .ds-bracket i:nth-child(1) { width: 28px; height: 2px; }
+    .ds-bracket i:nth-child(2) { width: 2px; height: 28px; }
+    .ds-bracket-tl { top: 14px; left: 14px; }
+    .ds-bracket-tl i:nth-child(1) { top: 0; left: 0; transform-origin: left center; }
+    .ds-bracket-tl i:nth-child(2) { top: 0; left: 0; transform-origin: center top; }
+    .ds-bracket-tr { top: 14px; right: 14px; }
+    .ds-bracket-tr i:nth-child(1) { top: 0; right: 0; transform-origin: right center; }
+    .ds-bracket-tr i:nth-child(2) { top: 0; right: 0; transform-origin: center top; }
+    .ds-bracket-br { bottom: 14px; right: 14px; }
+    .ds-bracket-br i:nth-child(1) { bottom: 0; right: 0; transform-origin: right center; }
+    .ds-bracket-br i:nth-child(2) { bottom: 0; right: 0; transform-origin: center bottom; }
+    .ds-bracket-bl { bottom: 14px; left: 14px; }
+    .ds-bracket-bl i:nth-child(1) { bottom: 0; left: 0; transform-origin: left center; }
+    .ds-bracket-bl i:nth-child(2) { bottom: 0; left: 0; transform-origin: center bottom; }
+
+    .ds-scanline {
+      position: absolute; left: 0; right: 0; top: 0; height: 2px;
+      background: linear-gradient(90deg, transparent, #E0A526, transparent);
+      opacity: 0; pointer-events: none; z-index: 2;
+    }
+
+    @keyframes ds-draw-h { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+    @keyframes ds-draw-v { from { transform: scaleY(0); } to { transform: scaleY(1); } }
+    @keyframes ds-scan {
+      0% { transform: translateY(-8%); opacity: 0; }
+      15% { opacity: .8; }
+      85% { opacity: .8; }
+      100% { transform: translateY(108%); opacity: 0; }
+    }
+    @media (prefers-reduced-motion: no-preference) {
+      .ds-bracket i:nth-child(1) { transform: scaleX(0); animation: ds-draw-h .25s cubic-bezier(0.16,1,0.3,1) both; }
+      .ds-bracket i:nth-child(2) { transform: scaleY(0); animation: ds-draw-v .25s cubic-bezier(0.16,1,0.3,1) both; }
+      .ds-bracket-tl i { animation-delay: .55s; }
+      .ds-bracket-tr i { animation-delay: .64s; }
+      .ds-bracket-br i { animation-delay: .73s; }
+      .ds-bracket-bl i { animation-delay: .82s; }
+      .ds-scanline { animation: ds-scan .6s ease-in-out 1.05s both; }
+    }
+    @media (prefers-reduced-motion: no-preference) {
+      .ds-hero-copy { animation: ds-rise-in .6s cubic-bezier(0.16,1,0.3,1) both; }
+      .ds-instrument { animation: ds-rise-in .6s cubic-bezier(0.16,1,0.3,1) .12s both; }
+    }
+    /* Progressive enhancement: scroll-linked reveal for the category shelf, Chrome/Edge only.
+       Unsupported browsers (Safari, Firefox) simply never enter this block — cards stay fully visible. */
+    @supports (animation-timeline: view()) {
+      @media (prefers-reduced-motion: no-preference) {
+        .ds-cat-card { animation: ds-fade-in .4s ease both; animation-timeline: view(); animation-range: entry 0% cover 20%; }
+      }
+    }
+
+    /* Motion: hover + focus feedback (style-hover attributes below are inert leftovers this replaces) */
+    .ds-link, .ds-link-invert, .ds-link-accent { transition: color .15s ease; }
+    .ds-link:hover { color: #1F6F5C !important; }
+    .ds-link:focus-visible { outline: 2px solid #1F6F5C; outline-offset: 2px; color: #1F6F5C !important; }
+    .ds-link-invert:hover { color: #E0A526 !important; }
+    .ds-link-invert:focus-visible { outline: 2px solid #E0A526; outline-offset: 2px; color: #E0A526 !important; }
+    .ds-link-accent:hover { color: #BE8C20 !important; }
+    .ds-link-accent:focus-visible { outline: 2px solid #BE8C20; outline-offset: 2px; color: #BE8C20 !important; }
+
+    .ds-btn-primary { transition: background-color .15s ease, transform .1s ease; }
+    .ds-btn-primary:hover { background: #BE8C20 !important; }
+    .ds-btn-primary:focus-visible { outline: 2px solid #1E2B2A; outline-offset: 2px; background: #BE8C20 !important; }
+    .ds-btn-primary:active { transform: scale(0.97); }
+
+    .ds-btn-ghost { transition: border-color .15s ease; }
+    .ds-btn-ghost:hover { border-color: #1E2B2A66 !important; }
+    .ds-btn-ghost:focus-visible { outline: 2px solid #1E2B2A; outline-offset: 2px; border-color: #1E2B2A66 !important; }
+
+    .ds-btn-footer { transition: background-color .15s ease; }
+    .ds-btn-footer:hover { background: #ffffff26 !important; }
+    .ds-btn-footer:focus-visible { outline: 2px solid #fff; outline-offset: 2px; background: #ffffff26 !important; }
+
+    .ds-cat-card { transition: transform .2s cubic-bezier(0.16,1,0.3,1), border-color .2s ease; }
+    .ds-cat-card:hover { transform: translateY(-4px); border-color: #1E2B2A2e; }
+    .ds-cat-bar { transition: transform .25s cubic-bezier(0.16,1,0.3,1); transform-origin: left; }
+    .ds-cat-card:hover .ds-cat-bar { transform: scaleX(1.333); }
+
+    image-slot { display: block; transition: transform .3s cubic-bezier(0.16,1,0.3,1); }
+
+    /* Presentation video */
+    .ds-video-frame { border-radius: 20px; overflow: hidden; max-width: 960px; margin: 0 auto; background: #1E2B2A; }
+    .ds-video-frame video { display: block; width: 100%; height: auto; }
+
+    /* Gallery carousel */
+    .ds-carousel { position: relative; border-radius: 16px; overflow: hidden; background: #1E2B2A0a; }
+    .ds-carousel-track { display: flex; transition: transform .5s cubic-bezier(0.16,1,0.3,1); }
+    .ds-carousel-slide { flex: 0 0 100%; min-width: 0; }
+    .ds-carousel-slide img { display: block; width: 100%; height: clamp(240px,45vw,420px); object-fit: cover; }
+
+    @keyframes ds-float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
+    @media (prefers-reduced-motion: no-preference) {
+      .ds-carousel-slide img { animation: ds-float 4s ease-in-out infinite; }
+      .ds-carousel:hover .ds-carousel-slide img, .ds-carousel:focus-within .ds-carousel-slide img { animation-play-state: paused; }
+    }
+
+    .ds-carousel-arrow {
+      position: absolute; top: 50%; transform: translateY(-50%);
+      width: 44px; height: 44px; border-radius: 999px; border: none;
+      background: #F7F4ECcc; color: #1E2B2A; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: background-color .15s ease;
+    }
+    .ds-carousel-arrow:hover { background: #E0A526; }
+    .ds-carousel-arrow:focus-visible { outline: 2px solid #E0A526; outline-offset: 2px; }
+    .ds-carousel-arrow-prev { left: 16px; }
+    .ds-carousel-arrow-next { right: 16px; }
+
+    .ds-carousel-dots { position: absolute; bottom: 16px; left: 0; right: 0; display: flex; justify-content: center; gap: 8px; }
+    .ds-carousel-dot {
+      width: 9px; height: 9px; border-radius: 999px; border: none; padding: 0;
+      background: #ffffff80; cursor: pointer; transition: background-color .2s ease, transform .2s ease;
+    }
+    .ds-carousel-dot:hover { background: #fff; }
+    .ds-carousel-dot:focus-visible { outline: 2px solid #E0A526; outline-offset: 2px; }
+    .ds-carousel-dot-active { background: #E0A526; transform: scale(1.3); }
+
+    .ds-quote-card { position: relative; overflow: hidden; }
+    .ds-quote-card::before {
+      content: '\201C'; position: absolute; top: 4px; left: 16px;
+      font-family: 'Lora', serif; font-size: 72px; line-height: 1; font-weight: 600;
+      color: #E0A52633; pointer-events: none;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .ds-hero-copy, .ds-instrument, .ds-cat-card { animation: none !important; opacity: 1 !important; transform: none !important; }
+      .ds-link, .ds-link-invert, .ds-link-accent, .ds-btn-primary, .ds-btn-ghost, .ds-btn-footer, .ds-cat-card, .ds-cat-bar, image-slot { transition: none !important; }
+      .ds-cat-card:hover, .ds-btn-primary:active, .ds-cat-card:hover .ds-cat-bar { transform: none !important; }
+      .ds-bracket i { animation: none !important; transform: none !important; }
+      .ds-scanline { display: none !important; }
+      .ds-carousel-slide img { animation: none !important; }
+      .ds-carousel-track { transition: none !important; }
+      .ds-carousel-arrow, .ds-carousel-dot { transition: none !important; }
+      .ds-carousel-dot-active { transform: none !important; }
+    }
+  </style>
+</helmet>
+
+<div style="max-width:1440px;margin:0 auto;background:#F7F4EC">
+
+  <!-- HEADER -->
+  <header style="display:flex;align-items:center;justify-content:space-between;padding:16px 24px;position:sticky;top:0;background:#F7F4ECee;backdrop-filter:blur(6px);z-index:50;border-bottom:1px solid #1E2B2A14;flex-wrap:wrap;gap:14px">
+    <div style="font-family:'Lora',serif;font-weight:600;font-size:24px;color:#8a6a12;letter-spacing:0.2px;white-space:nowrap">Bazar Jalevy</div>
+    <nav style="display:flex;align-items:center;gap:24px;flex-wrap:wrap;row-gap:10px">
+      <a href="#quem-somos" class="ds-link" style="color:#1E2B2A;font-weight:500;font-size:15px;white-space:nowrap;padding:10px 0">Quem Somos</a>
+      <a href="#produtos" class="ds-link" style="color:#1E2B2A;font-weight:500;font-size:15px;white-space:nowrap;padding:10px 0">Produtos</a>
+      <a href="#loja" class="ds-link" style="color:#1E2B2A;font-weight:500;font-size:15px;white-space:nowrap;padding:10px 0">A Loja</a>
+      <a href="#depoimentos" class="ds-link" style="color:#1E2B2A;font-weight:500;font-size:15px;white-space:nowrap;padding:10px 0">Depoimentos</a>
+      <a href="#contato" class="ds-link" style="color:#1E2B2A;font-weight:500;font-size:15px;white-space:nowrap;padding:10px 0">Contato</a>
+      <a href="https://wa.me/5521991329314?text=Ol%C3%A1!%20Vim%20pelo%20site%20do%20Bazar%20Jalevy." class="ds-btn-primary" style="background:#E0A526;color:#1E2B2A;padding:11px 22px;border-radius:999px;font-weight:600;font-size:14px">WhatsApp</a>
+    </nav>
+  </header>
+
+  <!-- HERO -->
+  <section style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(360px,100%),1fr));align-items:center;gap:56px;padding:clamp(32px,8vw,76px) clamp(20px,5vw,48px) clamp(48px,8vw,88px)">
+    <div class="ds-hero-copy">
+      <div style="display:inline-block;background:#E0A52622;color:#8a6a12;font-weight:600;font-size:13px;padding:6px 14px;border-radius:999px;margin-bottom:22px;letter-spacing:0.3px">VILA DA PENHA, RJ</div>
+      <h1 style="font-family:'Lora',serif;font-size:clamp(32px,4.5vw,52px);line-height:1.15;font-weight:600;margin:0 0 22px;color:#1E2B2A">Tudo o que sua casa precisa, num só lugar</h1>
+      <p style="font-size:18px;line-height:1.6;color:#666F6E;max-width:520px;margin:0 0 34px">Papelaria, material de escritório, ferramentas, material elétrico e hidráulico, carimbos, revelação de fotos, impressão e cópias. O Bazar Jalevy: o bazar que tem quase tudo.</p>
+      <div style="display:flex;gap:16px;flex-wrap:wrap">
+        <a href="https://wa.me/5521991329314?text=Ol%C3%A1!%20Vim%20pelo%20site%20do%20Bazar%20Jalevy." class="ds-btn-primary" style="background:#E0A526;color:#1E2B2A;padding:16px 30px;border-radius:10px;font-weight:600;font-size:16px;display:inline-flex;align-items:center;gap:8px">Chamar no WhatsApp</a>
+        <a href="#loja" class="ds-btn-ghost" style="background:transparent;color:#1E2B2A;padding:16px 30px;border-radius:10px;font-weight:600;font-size:16px;border:1.5px solid #1E2B2A2e">Ver endereço</a>
+      </div>
+    </div>
+    <div class="ds-instrument">
+      <image-slot id="hero-img" style="width:100%;height:clamp(240px,55vw,440px);min-width:0" shape="rounded" radius="20" placeholder="Foto da fachada ou do interior da loja" src="./photos/fachada.jpg"></image-slot>
+      <span class="ds-bracket ds-bracket-tl" aria-hidden="true"><i></i><i></i></span>
+      <span class="ds-bracket ds-bracket-tr" aria-hidden="true"><i></i><i></i></span>
+      <span class="ds-bracket ds-bracket-br" aria-hidden="true"><i></i><i></i></span>
+      <span class="ds-bracket ds-bracket-bl" aria-hidden="true"><i></i><i></i></span>
+      <span class="ds-scanline" aria-hidden="true"></span>
+    </div>
+  </section>
+
+  <!-- QUEM SOMOS -->
+  <section id="quem-somos" style="background:#1E2B2A;padding:clamp(48px,8vw,88px) clamp(20px,5vw,48px);display:grid;grid-template-columns:repeat(auto-fit,minmax(min(360px,100%),1fr));gap:56px;align-items:center">
+    <image-slot id="quem-somos-img" style="width:100%;height:clamp(240px,50vw,420px);min-width:0" shape="rounded" radius="20" placeholder="Foto dos donos da loja" src="./photos/quem-somos.png"></image-slot>
+    <div>
+      <div style="color:#E0A526;font-weight:700;font-size:13px;letter-spacing:1.5px;margin-bottom:14px">DESDE 1995</div>
+      <h2 style="font-family:'Lora',serif;font-size:32px;line-height:1.2;font-weight:600;margin:0 0 20px;color:#fff">Quem Somos</h2>
+      <p style="color:#ffffffb0;font-size:16px;line-height:1.7;max-width:60ch;margin:0">Fundado em 6 de março de 1995, o Bazar Jalevy começou como uma aconchegante loja de bairro dedicada a material escolar, presentes e utilidades em ferragens. Ao longo dos anos, atentos às necessidades de nossos clientes, expandimos nosso mix de produtos com maior diversidade e inovação para atender a um público cada vez mais exigente, com forte destaque para a área de informática. Prezamos sempre pela excelência no atendimento e pela alta qualidade de tudo o que oferecemos.</p>
+    </div>
+  </section>
+
+  <!-- VIDEO -->
+  <section style="padding:clamp(48px,8vw,88px) clamp(20px,5vw,48px)">
+    <div style="margin-bottom:36px;text-align:center">
+      <div style="color:#8a6a12;font-weight:700;font-size:13px;letter-spacing:1.5px;margin-bottom:10px">APRESENTAÇÃO</div>
+      <h2 style="font-family:'Lora',serif;font-size:32px;line-height:1.2;font-weight:600;margin:0;color:#1E2B2A">Conheça o Bazar Jalevy</h2>
+    </div>
+    <div class="ds-video-frame">
+      <video autoplay="autoplay" muted="muted" loop="loop" playsinline="playsinline" controls="controls" preload="auto" poster="./photos/fachada.jpg">
+        <source src="./videos/apresentacao.mp4" type="video/mp4">
+      </video>
+    </div>
+  </section>
+
+  <!-- CATEGORIES -->
+  <section id="produtos" style="padding:20px clamp(20px,5vw,48px) clamp(48px,8vw,90px)">
+    <div style="margin-bottom:40px">
+      <div style="color:#8a6a12;font-weight:700;font-size:13px;letter-spacing:1.5px;margin-bottom:10px">O QUE VOCÊ ENCONTRA AQUI</div>
+      <h2 style="font-family:'Lora',serif;font-size:34px;line-height:1.2;font-weight:600;margin:0;color:#1E2B2A">De tudo um pouco</h2>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(240px,100%),1fr));gap:18px">
+      <div class="ds-cat-card" style="background:#fff;border-radius:14px;padding:26px 24px;border:1px solid #1E2B2A0f">
+        <div class="ds-cat-bar" style="width:36px;height:4px;background:#E0A526;border-radius:2px;margin-bottom:16px"></div>
+        <div style="font-weight:700;font-size:17px;line-height:1.3;margin-bottom:6px">Material de escritório</div>
+        <div style="color:#666F6E;font-size:14px;line-height:1.5">Papel, canetas, organizadores e tudo para o dia a dia do trabalho.</div>
+      </div>
+      <div class="ds-cat-card" style="background:#fff;border-radius:14px;padding:26px 24px;border:1px solid #1E2B2A0f">
+        <div class="ds-cat-bar" style="width:36px;height:4px;background:#1F6F5C;border-radius:2px;margin-bottom:16px"></div>
+        <div style="font-weight:700;font-size:17px;line-height:1.3;margin-bottom:6px">Papelaria</div>
+        <div style="color:#666F6E;font-size:14px;line-height:1.5">Cadernos, artigos escolares e materiais para presentear.</div>
+      </div>
+      <div class="ds-cat-card" style="background:#fff;border-radius:14px;padding:26px 24px;border:1px solid #1E2B2A0f">
+        <div class="ds-cat-bar" style="width:36px;height:4px;background:#E0A526;border-radius:2px;margin-bottom:16px"></div>
+        <div style="font-weight:700;font-size:17px;line-height:1.3;margin-bottom:6px">Utensílios domésticos</div>
+        <div style="color:#666F6E;font-size:14px;line-height:1.5">Itens de cozinha e do lar para o uso de cada dia.</div>
+      </div>
+      <div class="ds-cat-card" style="background:#fff;border-radius:14px;padding:26px 24px;border:1px solid #1E2B2A0f">
+        <div class="ds-cat-bar" style="width:36px;height:4px;background:#1F6F5C;border-radius:2px;margin-bottom:16px"></div>
+        <div style="font-weight:700;font-size:17px;line-height:1.3;margin-bottom:6px">Ferramentas</div>
+        <div style="color:#666F6E;font-size:14px;line-height:1.5">O básico de ferramentas para reparos e manutenção da casa.</div>
+      </div>
+      <div class="ds-cat-card" style="background:#fff;border-radius:14px;padding:26px 24px;border:1px solid #1E2B2A0f">
+        <div class="ds-cat-bar" style="width:36px;height:4px;background:#E0A526;border-radius:2px;margin-bottom:16px"></div>
+        <div style="font-weight:700;font-size:17px;line-height:1.3;margin-bottom:6px">Confecção de carimbos</div>
+        <div style="color:#666F6E;font-size:14px;line-height:1.5">Carimbos sob encomenda, prontos rápido.</div>
+      </div>
+      <div class="ds-cat-card" style="background:#fff;border-radius:14px;padding:26px 24px;border:1px solid #1E2B2A0f">
+        <div class="ds-cat-bar" style="width:36px;height:4px;background:#1F6F5C;border-radius:2px;margin-bottom:16px"></div>
+        <div style="font-weight:700;font-size:17px;line-height:1.3;margin-bottom:6px">Revelação de fotos</div>
+        <div style="color:#666F6E;font-size:14px;line-height:1.5">Revele suas fotos com qualidade e entrega rápida.</div>
+      </div>
+      <div class="ds-cat-card" style="background:#fff;border-radius:14px;padding:26px 24px;border:1px solid #1E2B2A0f">
+        <div class="ds-cat-bar" style="width:36px;height:4px;background:#E0A526;border-radius:2px;margin-bottom:16px"></div>
+        <div style="font-weight:700;font-size:17px;line-height:1.3;margin-bottom:6px">Impressão e cópias</div>
+        <div style="color:#666F6E;font-size:14px;line-height:1.5">Documentos, trabalhos e cópias na hora.</div>
+      </div>
+      <div class="ds-cat-card" style="background:#fff;border-radius:14px;padding:26px 24px;border:1px solid #1E2B2A0f">
+        <div class="ds-cat-bar" style="width:36px;height:4px;background:#1F6F5C;border-radius:2px;margin-bottom:16px"></div>
+        <div style="font-weight:700;font-size:17px;line-height:1.3;margin-bottom:6px">Tintas Colorgin</div>
+        <div style="color:#666F6E;font-size:14px;line-height:1.5">Linha completa de tintas Colorgin para pintura, decoração e artesanato.</div>
+      </div>
+      <div class="ds-cat-card" style="background:#fff;border-radius:14px;padding:26px 24px;border:1px solid #1E2B2A0f">
+        <div class="ds-cat-bar" style="width:36px;height:4px;background:#E0A526;border-radius:2px;margin-bottom:16px"></div>
+        <div style="font-weight:700;font-size:17px;line-height:1.3;margin-bottom:6px">Artigos para casa</div>
+        <div style="color:#666F6E;font-size:14px;line-height:1.5">Mais itens para deixar a casa completa.</div>
+      </div>
+      <div class="ds-cat-card" style="background:#fff;border-radius:14px;padding:26px 24px;border:1px solid #1E2B2A0f">
+        <div class="ds-cat-bar" style="width:36px;height:4px;background:#1F6F5C;border-radius:2px;margin-bottom:16px"></div>
+        <div style="font-weight:700;font-size:17px;line-height:1.3;margin-bottom:6px">Material elétrico e hidráulico</div>
+        <div style="color:#666F6E;font-size:14px;line-height:1.5">Tubos, conexões, chuveiros, torneiras, disjuntores e tintas para sua instalação e reparo.</div>
+      </div>
+      <div class="ds-cat-card" style="background:#fff;border-radius:14px;padding:26px 24px;border:1px solid #1E2B2A0f">
+        <div class="ds-cat-bar" style="width:36px;height:4px;background:#E0A526;border-radius:2px;margin-bottom:16px"></div>
+        <div style="font-weight:700;font-size:17px;line-height:1.3;margin-bottom:6px">Foto 3x4</div>
+        <div style="color:#666F6E;font-size:14px;line-height:1.5">Fotos para documentos, na hora.</div>
+      </div>
+      <div class="ds-cat-card" style="background:#fff;border-radius:14px;padding:26px 24px;border:1px solid #1E2B2A0f">
+        <div class="ds-cat-bar" style="width:36px;height:4px;background:#1F6F5C;border-radius:2px;margin-bottom:16px"></div>
+        <div style="font-weight:700;font-size:17px;line-height:1.3;margin-bottom:6px">Plastificação</div>
+        <div style="color:#666F6E;font-size:14px;line-height:1.5">Proteja documentos e materiais com plastificação rápida.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- STORE / ABOUT -->
+  <section id="loja" style="background:#1E2B2A;padding:clamp(48px,8vw,88px) clamp(20px,5vw,48px);display:grid;grid-template-columns:repeat(auto-fit,minmax(min(360px,100%),1fr));gap:56px;align-items:center">
+    <image-slot id="loja-img" style="width:100%;height:clamp(240px,50vw,420px);min-width:0" shape="rounded" radius="20" placeholder="Foto do interior da loja" src="./photos/loja-1.jpg"></image-slot>
+    <div>
+      <div style="color:#E0A526;font-weight:700;font-size:13px;letter-spacing:1.5px;margin-bottom:14px">A LOJA</div>
+      <h2 style="font-family:'Lora',serif;font-size:32px;line-height:1.2;font-weight:600;margin:0 0 20px;color:#fff">Perto de você, na Vila da Penha</h2>
+      <p style="color:#ffffffb0;font-size:16px;line-height:1.7;max-width:60ch;margin:0 0 28px">O Bazar Jalevy é aquele tipo de loja de bairro que resolve o seu dia: precisa de papel para o trabalho, uma ferramenta para o reparo em casa, revelar aquela foto ou tirar uma cópia rápida? É só passar aqui.</p>
+      <div style="display:flex;flex-direction:column;gap:14px">
+        <div style="display:flex;gap:12px;align-items:flex-start">
+          <div style="color:#E0A526;font-weight:700;font-size:14px;min-width:76px">Horário</div>
+          <div style="color:#fff;font-size:15px;line-height:1.4">Seg a sex, 8h às 18h · Sáb, 8h às 13h</div>
+        </div>
+        <div style="display:flex;gap:12px;align-items:flex-start">
+          <div style="color:#E0A526;font-weight:700;font-size:14px;min-width:76px">Endereço</div>
+          <div style="color:#fff;font-size:15px;line-height:1.4">Rua Marco Polo, 237 — Vila da Penha, Rio de Janeiro — RJ</div>
+        </div>
+        <div style="display:flex;gap:12px;align-items:flex-start">
+          <div style="color:#E0A526;font-weight:700;font-size:14px;min-width:76px">WhatsApp</div>
+          <a href="https://wa.me/5521991329314" class="ds-link-invert" style="color:#fff;font-size:15px;line-height:1.4">(21) 99132-9314</a>
+        </div>
+        <div style="display:flex;gap:12px;align-items:flex-start">
+          <div style="color:#E0A526;font-weight:700;font-size:14px;min-width:76px">Telefone</div>
+          <a href="tel:+552124811725" class="ds-link-invert" style="color:#fff;font-size:15px;line-height:1.4">(21) 2481-1725</a>
+        </div>
+        <div style="display:flex;gap:12px;align-items:flex-start">
+          <div style="color:#E0A526;font-weight:700;font-size:14px;min-width:76px">E-mail</div>
+          <a href="mailto:bazarjalevytemtudo@gmail.com" class="ds-link-invert" style="color:#fff;font-size:15px;line-height:1.4">bazarjalevytemtudo@gmail.com</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- GALLERY -->
+  <section style="padding:clamp(48px,8vw,88px) clamp(20px,5vw,48px)">
+    <div style="margin-bottom:36px">
+      <div style="color:#8a6a12;font-weight:700;font-size:13px;letter-spacing:1.5px;margin-bottom:10px">GALERIA</div>
+      <h2 style="font-family:'Lora',serif;font-size:32px;line-height:1.2;font-weight:600;margin:0;color:#1E2B2A">Um pouco do nosso dia a dia</h2>
+    </div>
+    <div class="ds-carousel" role="region" aria-label="Galeria de fotos da loja" onmouseenter="{{onEnter}}" onmouseleave="{{onLeave}}" onfocus="{{onFocusIn}}" onblur="{{onFocusOut}}" ontouchstart="{{onTouchStart}}" ontouchend="{{onTouchEnd}}">
+      <div class="ds-carousel-track" style="{{trackStyle}}">
+        <div class="ds-carousel-slide"><img src="./photos/vitrine-1.jpg" alt="Foto da loja" loading="lazy"></div>
+        <div class="ds-carousel-slide"><img src="./photos/vitrine-2.jpg" alt="Foto de produtos" loading="lazy"></div>
+        <div class="ds-carousel-slide"><img src="./photos/ferramentas.jpg" alt="Foto do balcão" loading="lazy"></div>
+        <div class="ds-carousel-slide"><img src="./photos/impressoras.jpg" alt="Foto de produtos" loading="lazy"></div>
+        <div class="ds-carousel-slide"><img src="./photos/papelaria.jpg" alt="Foto da papelaria" loading="lazy"></div>
+        <div class="ds-carousel-slide"><img src="./photos/churrasqueiras.jpg" alt="Foto da loja" loading="lazy"></div>
+      </div>
+      <button type="button" class="ds-carousel-arrow ds-carousel-arrow-prev" onclick="{{prev}}" aria-label="Foto anterior">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 6 9 12 15 18"></polyline></svg>
+      </button>
+      <button type="button" class="ds-carousel-arrow ds-carousel-arrow-next" onclick="{{next}}" aria-label="Próxima foto">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 6 15 12 9 18"></polyline></svg>
+      </button>
+      <div class="ds-carousel-dots">
+        <button type="button" class="{{dot0Class}}" data-index="0" onclick="{{goTo}}" aria-label="Ir para foto 1"></button>
+        <button type="button" class="{{dot1Class}}" data-index="1" onclick="{{goTo}}" aria-label="Ir para foto 2"></button>
+        <button type="button" class="{{dot2Class}}" data-index="2" onclick="{{goTo}}" aria-label="Ir para foto 3"></button>
+        <button type="button" class="{{dot3Class}}" data-index="3" onclick="{{goTo}}" aria-label="Ir para foto 4"></button>
+        <button type="button" class="{{dot4Class}}" data-index="4" onclick="{{goTo}}" aria-label="Ir para foto 5"></button>
+        <button type="button" class="{{dot5Class}}" data-index="5" onclick="{{goTo}}" aria-label="Ir para foto 6"></button>
+      </div>
+    </div>
+  </section>
+
+  <!-- TESTIMONIALS -->
+  <section id="depoimentos" style="background:#fff;padding:clamp(48px,8vw,88px) clamp(20px,5vw,48px)">
+    <div style="margin-bottom:40px;text-align:center">
+      <div style="color:#8a6a12;font-weight:700;font-size:13px;letter-spacing:1.5px;margin-bottom:10px">DEPOIMENTOS</div>
+      <h2 style="font-family:'Lora',serif;font-size:32px;line-height:1.2;font-weight:600;margin:0;color:#1E2B2A">Quem já passou por aqui</h2>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(260px,100%),1fr));gap:22px;max-width:1100px;margin:0 auto">
+      <div class="ds-quote-card" style="background:#F7F4EC;border-radius:16px;padding:30px 26px">
+        <p style="font-family:'Lora',serif;font-style:italic;font-size:16px;line-height:1.6;color:#1E2B2A;margin:0 0 20px">"Sempre encontro o que preciso, e o atendimento é rápido. Virou parada certa aqui do bairro."</p>
+        <div style="font-weight:700;font-size:14px;color:#8a6a12">— Cliente da loja</div>
+      </div>
+      <div class="ds-quote-card" style="background:#F7F4EC;border-radius:16px;padding:30px 26px">
+        <p style="font-family:'Lora',serif;font-style:italic;font-size:16px;line-height:1.6;color:#1E2B2A;margin:0 0 20px">"Fiz um carimbo e revelei fotos no mesmo dia. Preço justo e entrega rápida."</p>
+        <div style="font-weight:700;font-size:14px;color:#8a6a12">— Cliente da loja</div>
+      </div>
+      <div class="ds-quote-card" style="background:#F7F4EC;border-radius:16px;padding:30px 26px">
+        <p style="font-family:'Lora',serif;font-style:italic;font-size:16px;line-height:1.6;color:#1E2B2A;margin:0 0 20px">"É o tipo de loja que tem de tudo. Não preciso rodar o bairro inteiro para resolver as coisas."</p>
+        <div style="font-weight:700;font-size:14px;color:#8a6a12">— Cliente da loja</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CONTACT / MAP -->
+  <section id="contato" style="padding:clamp(48px,8vw,88px) clamp(20px,5vw,48px);display:grid;grid-template-columns:repeat(auto-fit,minmax(min(360px,100%),1fr));gap:56px;align-items:center">
+    <div>
+      <div style="color:#8a6a12;font-weight:700;font-size:13px;letter-spacing:1.5px;margin-bottom:14px">VENHA NOS VISITAR</div>
+      <h2 style="font-family:'Lora',serif;font-size:32px;line-height:1.2;font-weight:600;margin:0 0 24px;color:#1E2B2A">Rua Marco Polo, 237 — Vila da Penha, RJ</h2>
+      <p style="color:#666F6E;font-size:16px;line-height:1.7;max-width:60ch;margin:0 0 30px">Fale com a gente pelo WhatsApp para tirar dúvidas, confirmar disponibilidade de produtos ou combinar uma encomenda de carimbo.</p>
+      <a href="https://wa.me/5521991329314?text=Ol%C3%A1!%20Vim%20pelo%20site%20do%20Bazar%20Jalevy." class="ds-btn-primary" style="background:#E0A526;color:#1E2B2A;padding:16px 30px;border-radius:10px;font-weight:600;font-size:16px;display:inline-flex;align-items:center;gap:8px">Chamar no WhatsApp</a>
+    </div>
+    <div style="border-radius:20px;overflow:hidden;height:clamp(240px,50vw,360px);border:1px solid #1E2B2A14">
+      <iframe title="Mapa" src="https://maps.google.com/maps?q=Rua%20Marco%20Polo%20237%2C%20Vila%20da%20Penha%2C%20Rio%20de%20Janeiro%20-%20RJ&output=embed" style="width:100%;height:100%;border:0"></iframe>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer style="background:#1E2B2A;padding:clamp(32px,6vw,48px) clamp(20px,5vw,48px) 30px;color:#ffffffb0">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:30px;margin-bottom:30px">
+      <div>
+        <div style="font-family:'Lora',serif;font-weight:600;font-size:22px;color:#fff;margin-bottom:10px">Bazar e Papelaria Jalevy</div>
+        <div style="font-size:14px;line-height:1.7">Rua Marco Polo, 237 — Vila da Penha, RJ<br>Seg a sex, 8h às 18h · Sáb, 8h às 13h<br>WhatsApp: <a href="https://wa.me/5521991329314" class="ds-link-accent" style="color:#E0A526">(21) 99132-9314</a><br>Telefone: <a href="tel:+552124811725" class="ds-link-accent" style="color:#E0A526">(21) 2481-1725</a><br>E-mail: <a href="mailto:bazarjalevytemtudo@gmail.com" class="ds-link-accent" style="color:#E0A526">bazarjalevytemtudo@gmail.com</a></div>
+      </div>
+      <div style="display:flex;gap:14px">
+        <a href="https://wa.me/5521991329314" class="ds-btn-footer" style="background:#ffffff14;color:#fff;padding:12px 20px;border-radius:8px;font-weight:600;font-size:14px">WhatsApp</a>
+        <a href="mailto:bazarjalevytemtudo@gmail.com" class="ds-btn-footer" style="background:#ffffff14;color:#fff;padding:12px 20px;border-radius:8px;font-weight:600;font-size:14px">E-mail</a>
+      </div>
+    </div>
+    <div style="border-top:1px solid #ffffff1f;padding-top:20px;font-size:13px">© 2026 Bazar e Papelaria Jalevy. Todos os direitos reservados.</div>
+  </footer>
+
+</div>
+
+<script data-dc-script>
+class Component extends DCLogic {
+  state = { activeIndex: 0, hovering: false, focused: false };
+  slideCount = 6;
+  touchStartX = null;
+
+  isPaused() {
+    return this.state.hovering || this.state.focused;
+  }
+
+  goTo = (e) => {
+    const i = Number(e.currentTarget.dataset.index);
+    this.setState({ activeIndex: i });
+    this.restartAutoplay();
+  };
+  next = () => {
+    this.setState((s) => ({ activeIndex: (s.activeIndex + 1) % this.slideCount }));
+  };
+  prev = () => {
+    this.setState((s) => ({ activeIndex: (s.activeIndex + this.slideCount - 1) % this.slideCount }));
+    this.restartAutoplay();
+  };
+  onEnter = () => this.setState({ hovering: true });
+  onLeave = () => this.setState({ hovering: false });
+  onFocusIn = (e) => {
+    // Only pause for real keyboard navigation (:focus-visible) — a mouse click
+    // also focuses the clicked button, but must not pause autoplay forever.
+    if (e.target && e.target.matches && e.target.matches(':focus-visible')) {
+      this.setState({ focused: true });
+    }
+  };
+  onFocusOut = () => this.setState({ focused: false });
+
+  onTouchStart = (e) => {
+    this.touchStartX = e.changedTouches[0].clientX;
+  };
+  onTouchEnd = (e) => {
+    if (this.touchStartX == null) return;
+    const dx = e.changedTouches[0].clientX - this.touchStartX;
+    this.touchStartX = null;
+    if (Math.abs(dx) < 40) return;
+    if (dx < 0) this.next(); else this.prev();
+    this.restartAutoplay();
+  };
+
+  startAutoplay() {
+    this.stopAutoplay();
+    if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    this.timer = setInterval(() => {
+      if (!this.isPaused()) this.next();
+    }, 4000);
+  }
+  stopAutoplay() {
+    if (this.timer) clearInterval(this.timer);
+  }
+  restartAutoplay() {
+    this.startAutoplay();
+  }
+
+  componentDidMount() {
+    this.startAutoplay();
+    // React-rendered <video autoplay> often doesn't actually start playing —
+    // the browser's native "autoplay on parse" heuristic only reliably fires
+    // for elements the HTML parser itself inserts, not ones a JS framework
+    // creates. Muted autoplay must be started explicitly.
+    const video = document.querySelector('.ds-video-frame video');
+    if (video) {
+      video.muted = true;
+      const p = video.play();
+      if (p && p.catch) p.catch(() => {});
+    }
+  }
+  componentWillUnmount() {
+    this.stopAutoplay();
+  }
+
+  renderVals() {
+    const i = this.state.activeIndex;
+    const dotClass = (n) => 'ds-carousel-dot' + (n === i ? ' ds-carousel-dot-active' : '');
+    return {
+      trackStyle: 'transform:translateX(-' + (i * 100) + '%)',
+      goTo: this.goTo,
+      next: this.next,
+      prev: this.prev,
+      onEnter: this.onEnter,
+      onLeave: this.onLeave,
+      onFocusIn: this.onFocusIn,
+      onFocusOut: this.onFocusOut,
+      onTouchStart: this.onTouchStart,
+      onTouchEnd: this.onTouchEnd,
+      dot0Class: dotClass(0),
+      dot1Class: dotClass(1),
+      dot2Class: dotClass(2),
+      dot3Class: dotClass(3),
+      dot4Class: dotClass(4),
+      dot5Class: dotClass(5),
+    };
+  }
+}
+</script>
+
+</x-dc>
+</body>
+</html>

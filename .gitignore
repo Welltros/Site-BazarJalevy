@@ -1,3 +1,18 @@
 Thumbs.db
 desktop.ini
 .DS_Store
+
+# Configuração local de ferramentas de IA (não faz parte do site)
+.agent/
+.agents/
+.claude/
+.codex/
+.gemini/
+.opencode/
+.impeccable/
+
+# Vídeo bruto original (69,5MB) — a versão comprimida usada no site fica em videos/apresentacao.mp4
+Videos/Jalevy Oficial.mp4
+
+# Fotos de câmera não utilizadas no site (material de reserva, mantido localmente)
+photos/IMG_*.jpg
