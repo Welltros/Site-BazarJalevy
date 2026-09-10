@@ -74,8 +74,9 @@ AddDefaultCharset utf-8
 RedirectMatch 404 (?i)/\.(git|env|ht|vscode|idea|claude|impeccable)
 
 # Extensões de arquivos de desenvolvimento / documentação / config
+# (.js NÃO entra aqui — support.js e image-slot.js precisam ser servidos)
 <IfModule mod_authz_core.c>
-  <FilesMatch "\.(md|markdown|json|lock|yml|yaml|ini|log|bak|old|orig|sample|sh|ps1|map|dc\.html)$">
+  <FilesMatch "\.(md|markdown|json|lock|yml|yaml|ini|log|bak|old|orig|sample|sh|ps1|mjs|cjs|ts|map|dc\.html)$">
     Require all denied
   </FilesMatch>
 </IfModule>
