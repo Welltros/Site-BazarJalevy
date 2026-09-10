@@ -1,8 +1,8 @@
 # Como publicar o site na HostGator
 
-Site: **Bazar Jalevy** · Domínio: **bazarjalevy.com.br** (sem www)
+Site: **Bazar Jalevy** · Domínio: **bazarjalevy.com** (sem www)
 
-> Se o domínio for outro, antes de subir troque `bazarjalevy.com.br` nos arquivos
+> Se o domínio for outro, antes de subir troque `bazarjalevy.com` nos arquivos
 > `index.html`, `robots.txt` e `sitemap.xml` (e rode `node build-deploy.mjs` de novo).
 
 ---
@@ -36,7 +36,7 @@ Se subir sem querer, o `.htaccess` bloqueia o acesso — mas o certo é só envi
 ## Passo a passo
 
 ### 1. Apontar o domínio para a HostGator
-No painel onde o domínio `bazarjalevy.com.br` foi registrado, configure os
+No painel onde o domínio `bazarjalevy.com` foi registrado, configure os
 **nameservers** da HostGator (algo como `ns1.hostgator.com.br` / `ns2.hostgator.com.br`
 — os corretos aparecem no e-mail de boas-vindas da HostGator e no cPanel).
 A propagação leva de alguns minutos a algumas horas.
@@ -67,14 +67,14 @@ Use os dados de FTP do cPanel. Envie o **conteúdo** de `deploy/` para `public_h
 arquivos ocultos**).
 
 ### 4. Testar
-Abra `https://bazarjalevy.com.br` (sem www e com https).
+Abra `https://bazarjalevy.com` (sem www e com https).
 - [ ] Cadeado de segurança aparece
-- [ ] `http://bazarjalevy.com.br` redireciona pra `https://`
-- [ ] `https://www.bazarjalevy.com.br` redireciona pra sem-www
+- [ ] `http://bazarjalevy.com` redireciona pra `https://`
+- [ ] `https://www.bazarjalevy.com` redireciona pra sem-www
 - [ ] O vídeo toca sozinho (mudo) e o botão "Ativar som" funciona
 - [ ] O carrossel de fotos passa sozinho
 - [ ] Abre bem no celular
-- [ ] `https://bazarjalevy.com.br/robots.txt` e `/sitemap.xml` abrem
+- [ ] `https://bazarjalevy.com/robots.txt` e `/sitemap.xml` abrem
 
 ### 5. Ligar o HSTS (opcional, recomendado)
 Depois que o HTTPS estiver 100% funcionando por alguns dias, edite o `.htaccess`
@@ -86,9 +86,9 @@ navegador a sempre usar HTTPS.
 ## Depois de no ar — SEO
 
 1. **Google Search Console** (https://search.google.com/search-console)
-   - Adicione a propriedade `bazarjalevy.com.br` (verificação por registro DNS TXT,
+   - Adicione a propriedade `bazarjalevy.com` (verificação por registro DNS TXT,
      que se faz no mesmo painel de nameservers).
-   - Em **Sitemaps**, envie `https://bazarjalevy.com.br/sitemap.xml`.
+   - Em **Sitemaps**, envie `https://bazarjalevy.com/sitemap.xml`.
    - Use **Inspeção de URL** na home e clique em "Solicitar indexação".
 
 2. **Perfil da Empresa no Google** (https://business.google.com) — **o mais importante
@@ -99,7 +99,7 @@ navegador a sempre usar HTTPS.
    - Categoria principal: *Papelaria*. Categorias extras: *Loja de ferragens*,
      *Loja de materiais elétricos*, *Loja de informática*.
    - Horário: Seg–Sex 8h–18h, Sáb 8h–13h.
-   - Coloque o site `https://bazarjalevy.com.br` e várias fotos.
+   - Coloque o site `https://bazarjalevy.com` e várias fotos.
 
 3. **Bing Webmaster Tools** (https://www.bing.com/webmasters) — opcional, rápido:
    dá pra importar direto do Search Console e enviar o mesmo sitemap.

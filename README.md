@@ -35,8 +35,8 @@ Veja **[HOSPEDAGEM.md](HOSPEDAGEM.md)** para o passo a passo completo.
 Resumo: rode `node build-deploy.mjs` para gerar a pasta `deploy/` (só o que sobe
 pro servidor) e envie o **conteúdo** dela para `public_html/`.
 
-Domínio configurado: **bazarjalevy.com.br** (sem www). Se mudar, troque
-`bazarjalevy.com.br` em `index.html`, `robots.txt` e `sitemap.xml` e rode o
+Domínio configurado: **bazarjalevy.com** (sem www). Se mudar, troque
+`bazarjalevy.com` em `index.html`, `robots.txt` e `sitemap.xml` e rode o
 build de novo.
 
 ## Estrutura de arquivos

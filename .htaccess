@@ -1,7 +1,7 @@
 # ==========================================================================
 #  Bazar Jalevy — configuração de hospedagem (Apache 2.4 / HostGator cPanel)
-#  Domínio: bazarjalevy.com.br  (sem www)
-#  Se o domínio mudar: troque "bazarjalevy.com.br" aqui, no index.html,
+#  Domínio: bazarjalevy.com  (sem www)
+#  Se o domínio mudar: troque "bazarjalevy.com" aqui, no index.html,
 #  no robots.txt e no sitemap.xml.
 # ==========================================================================
 
@@ -24,11 +24,11 @@ AddDefaultCharset utf-8
   # http://  ->  https://   (as duas condições juntas evitam loop atrás de proxy)
   RewriteCond %{HTTPS} off
   RewriteCond %{HTTP:X-Forwarded-Proto} !https
-  RewriteRule ^ https://bazarjalevy.com.br%{REQUEST_URI} [R=301,L]
+  RewriteRule ^ https://bazarjalevy.com%{REQUEST_URI} [R=301,L]
 
   # www.  ->  (sem www)
   RewriteCond %{HTTP_HOST} ^www\.(.+)$ [NC]
-  RewriteRule ^ https://bazarjalevy.com.br%{REQUEST_URI} [R=301,L]
+  RewriteRule ^ https://bazarjalevy.com%{REQUEST_URI} [R=301,L]
 </IfModule>
 
 # ==========================================================================
