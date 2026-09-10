@@ -20,5 +20,5 @@ photos/IMG_*.jpg
 
 # Pacote de publicação — gerado por `node build-deploy.mjs`, não versionado
 deploy/
-*.deploy.zip
+*.zip
 
