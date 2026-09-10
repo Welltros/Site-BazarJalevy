@@ -1,0 +1,155 @@
+# ==========================================================================
+#  Bazar Jalevy — configuração de hospedagem (Apache 2.4 / HostGator cPanel)
+#  Domínio: bazarjalevy.com.br  (sem www)
+#  Se o domínio mudar: troque "bazarjalevy.com.br" aqui, no index.html,
+#  no robots.txt e no sitemap.xml.
+# ==========================================================================
+
+# --- Página inicial do diretório -----------------------------------------
+DirectoryIndex index.html
+
+# --- Nunca listar o conteúdo das pastas ---------------------------------
+Options -Indexes
+
+# --- Charset padrão ----------------------------------------------------
+AddDefaultCharset utf-8
+
+# ==========================================================================
+#  Redirecionamentos: força HTTPS + domínio sem www (evita conteúdo
+#  duplicado no Google — uma URL canônica só).
+# ==========================================================================
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+
+  # http://  ->  https://   (as duas condições juntas evitam loop atrás de proxy)
+  RewriteCond %{HTTPS} off
+  RewriteCond %{HTTP:X-Forwarded-Proto} !https
+  RewriteRule ^ https://bazarjalevy.com.br%{REQUEST_URI} [R=301,L]
+
+  # www.  ->  (sem www)
+  RewriteCond %{HTTP_HOST} ^www\.(.+)$ [NC]
+  RewriteRule ^ https://bazarjalevy.com.br%{REQUEST_URI} [R=301,L]
+</IfModule>
+
+# ==========================================================================
+#  Cabeçalhos de segurança
+# ==========================================================================
+<IfModule mod_headers.c>
+  # Impede o navegador de "adivinhar" o tipo do arquivo
+  Header always set X-Content-Type-Options "nosniff"
+
+  # Impede que o site seja embutido em iframe de outro site (clickjacking)
+  Header always set X-Frame-Options "SAMEORIGIN"
+
+  # Só manda o domínio (não a URL cheia) no Referer ao sair do site
+  Header always set Referrer-Policy "strict-origin-when-cross-origin"
+
+  # Desliga APIs sensíveis que este site não usa
+  Header always set Permissions-Policy "geolocation=(), microphone=(), camera=(), payment=(), usb=()"
+
+  # Content-Security-Policy — limita de onde script/estilo/mídia podem vir.
+  # 'unsafe-eval' é necessário porque o runtime do site (Babel) compila
+  # JSX no navegador; 'unsafe-inline' por causa dos estilos/scripts inline.
+  Header always set Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://unpkg.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: blob:; media-src 'self'; connect-src 'self' https://unpkg.com; frame-src https://www.google.com https://maps.google.com; base-uri 'self'; form-action 'self' https://wa.me https://api.whatsapp.com; object-src 'none'; upgrade-insecure-requests"
+
+  # HSTS — força HTTPS por 1 ano. ATIVE ISTO só depois de confirmar que o
+  # site abre 100% em https:// (SSL da HostGator já emitido e funcionando).
+  # Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains"
+
+  # Remove o header que expõe a versão do PHP/servidor, quando possível
+  Header unset X-Powered-By
+  Header always unset X-Powered-By
+</IfModule>
+
+# ==========================================================================
+#  Bloqueia acesso a arquivos internos (não devem ser servidos ao público)
+# ==========================================================================
+
+# Qualquer arquivo/pasta que começa com ponto (.git, .htaccess, .env, ...)
+<IfModule mod_authz_core.c>
+  <FilesMatch "^\.">
+    Require all denied
+  </FilesMatch>
+</IfModule>
+RedirectMatch 404 (?i)/\.(git|env|ht|vscode|idea|claude|impeccable)
+
+# Extensões de arquivos de desenvolvimento / documentação / config
+<IfModule mod_authz_core.c>
+  <FilesMatch "\.(md|markdown|json|lock|yml|yaml|ini|log|bak|old|orig|sample|sh|ps1|map|dc\.html)$">
+    Require all denied
+  </FilesMatch>
+</IfModule>
+
+# Arquivos específicos que existem no repositório mas não no site
+<IfModule mod_authz_core.c>
+  <FilesMatch "^(README|DESIGN|HOSPEDAGEM|CHANGELOG|LICENSE|package(-lock)?|skills-lock)$">
+    Require all denied
+  </FilesMatch>
+</IfModule>
+
+# ==========================================================================
+#  Compressão (mod_deflate) — reduz o peso de HTML/CSS/JS/SVG
+# ==========================================================================
+<IfModule mod_deflate.c>
+  AddOutputFilterByType DEFLATE text/html text/plain text/css text/xml
+  AddOutputFilterByType DEFLATE application/javascript application/x-javascript
+  AddOutputFilterByType DEFLATE application/json application/xml
+  AddOutputFilterByType DEFLATE image/svg+xml
+</IfModule>
+<IfModule mod_brotli.c>
+  AddOutputFilterByType BROTLI_COMPRESS text/html text/css application/javascript image/svg+xml application/json
+</IfModule>
+
+# ==========================================================================
+#  Cache do navegador (mod_expires) — assets versionados por nome
+# ==========================================================================
+<IfModule mod_expires.c>
+  ExpiresActive On
+
+  # Imagens e vídeo: 1 ano
+  ExpiresByType image/jpeg              "access plus 1 year"
+  ExpiresByType image/png               "access plus 1 year"
+  ExpiresByType image/webp              "access plus 1 year"
+  ExpiresByType image/svg+xml           "access plus 1 year"
+  ExpiresByType image/x-icon            "access plus 1 year"
+  ExpiresByType video/mp4               "access plus 1 year"
+
+  # Fontes: 1 ano
+  ExpiresByType font/woff2              "access plus 1 year"
+
+  # CSS/JS do próprio site: 7 dias (não têm hash no nome)
+  ExpiresByType text/css                "access plus 7 days"
+  ExpiresByType application/javascript  "access plus 7 days"
+
+  # HTML: 1 hora (para mudanças aparecerem rápido)
+  ExpiresByType text/html               "access plus 1 hour"
+</IfModule>
+
+<IfModule mod_headers.c>
+  # Reforça cache longo e imutável para mídia
+  <FilesMatch "\.(jpg|jpeg|png|webp|svg|ico|mp4|woff2)$">
+    Header set Cache-Control "public, max-age=31536000, immutable"
+  </FilesMatch>
+  <FilesMatch "\.(css|js)$">
+    Header set Cache-Control "public, max-age=604800"
+  </FilesMatch>
+  <FilesMatch "\.(html)$">
+    Header set Cache-Control "public, max-age=3600, must-revalidate"
+  </FilesMatch>
+</IfModule>
+
+# ==========================================================================
+#  Tipos MIME (garante que o servidor entregue com o Content-Type certo)
+# ==========================================================================
+<IfModule mod_mime.c>
+  AddType image/webp                  .webp
+  AddType image/svg+xml               .svg
+  AddType video/mp4                   .mp4
+  AddType application/manifest+json   .webmanifest
+  AddType font/woff2                  .woff2
+</IfModule>
+
+# ==========================================================================
+#  Página de erro 404 — manda o visitante de volta para a home
+# ==========================================================================
+ErrorDocument 404 /index.html
